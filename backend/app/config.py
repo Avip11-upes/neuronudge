@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     # Database configuration (configurable for local and Droplet deployment)
     database_url: str = f"sqlite:///{DEFAULT_DB_FILE}"
 
-    # Gemma 4 LLM Service placeholders for Assessment/Reporting modules
-    gemma_model_name: str = "gemma-4"
+    # Gemma 4 LLM Service configuration
+    gemma_model_name: str = "gemma-4-26b-a4b-it"
     gemma_api_base_url: str = "http://localhost:11434"
     gemini_api_key: Optional[str] = None
 
