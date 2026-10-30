@@ -1,0 +1,137 @@
+{
+  "stage": "dyslexia",
+  "age_band": "8-12",
+  "age_min": 8,
+  "age_max": 12,
+  "description": "Intermediate reading, phonological manipulation, and comprehension activities for ages 8 to 12.",
+  "questions": [
+    {
+      "id": "dys_8_12_01",
+      "category": "letter_sound_matching",
+      "prompt": "Which letters make the long 'E' sound in the word 'TEACH'?",
+      "prompt_text": "Which letters make the long 'E' sound in the word 'TEACH'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which letters make the long E sound in the word teach?",
+      "options": [
+        { "id": "opt_ea", "text": "EA", "label": "EA" },
+        { "id": "opt_ee", "text": "EE", "label": "EE" },
+        { "id": "opt_ie", "text": "IE", "label": "IE" },
+        { "id": "opt_ey", "text": "EY", "label": "EY" }
+      ],
+      "correct_option_id": "opt_ea"
+    },
+    {
+      "id": "dys_8_12_02",
+      "category": "rhyme_phonological_awareness",
+      "prompt": "If you take away the 'S' sound from 'SPARK', what new word do you get?",
+      "prompt_text": "If you take away the 'S' sound from 'SPARK', what new word do you get?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "If you take away the S sound from spark, what new word do you get?",
+      "options": [
+        { "id": "opt_park", "text": "Park", "label": "Park" },
+        { "id": "opt_bark", "text": "Bark", "label": "Bark" },
+        { "id": "opt_dark", "text": "Dark", "label": "Dark" },
+        { "id": "opt_lark", "text": "Lark", "label": "Lark" }
+      ],
+      "correct_option_id": "opt_park"
+    },
+    {
+      "id": "dys_8_12_03",
+      "category": "real_vs_nonword",
+      "prompt": "Look at the choices below. Which one is a REAL English word?",
+      "prompt_text": "Look at the choices below. Which one is a REAL English word?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which of these is a real English word? Basket, Flirp, Drost, or Glop?",
+      "options": [
+        { "id": "opt_basket", "text": "Basket", "label": "Basket" },
+        { "id": "opt_flirp", "text": "Flirp", "label": "Flirp" },
+        { "id": "opt_drost", "text": "Drost", "label": "Drost" },
+        { "id": "opt_glop", "text": "Glop", "label": "Glop" }
+      ],
+      "correct_option_id": "opt_basket"
+    },
+    {
+      "id": "dys_8_12_04",
+      "category": "spelling_choices",
+      "prompt": "Choose the word that is spelled correctly:",
+      "prompt_text": "Choose the word that is spelled correctly:",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Choose the word that is spelled correctly: Friend, Freind, Frind, or Frend?",
+      "options": [
+        { "id": "opt_friend", "text": "Friend", "label": "Friend" },
+        { "id": "opt_freind", "text": "Freind", "label": "Freind" },
+        { "id": "opt_frind", "text": "Frind", "label": "Frind" },
+        { "id": "opt_frend", "text": "Frend", "label": "Frend" }
+      ],
+      "correct_option_id": "opt_friend"
+    },
+    {
+      "id": "dys_8_12_05",
+      "category": "letter_recognition",
+      "prompt": "Which word starts with the lowercase letter 'p' and ends with 'd'?",
+      "prompt_text": "Which word starts with the lowercase letter 'p' and ends with 'd'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which word starts with the lowercase letter p and ends with d?",
+      "options": [
+        { "id": "opt_pond", "text": "pond", "label": "pond" },
+        { "id": "opt_bond", "text": "bond", "label": "bond" },
+        { "id": "opt_dond", "text": "dond", "label": "dond" },
+        { "id": "opt_qond", "text": "qond", "label": "qond" }
+      ],
+      "correct_option_id": "opt_pond"
+    },
+    {
+      "id": "dys_8_12_06",
+      "category": "sequencing",
+      "prompt": "Look at the sequence of days: Tuesday, Wednesday, Thursday... What comes next?",
+      "prompt_text": "Look at the sequence of days: Tuesday, Wednesday, Thursday... What comes next?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Look at the sequence of days: Tuesday, Wednesday, Thursday. What comes next?",
+      "options": [
+        { "id": "opt_fri", "text": "Friday", "label": "Friday" },
+        { "id": "opt_sat", "text": "Saturday", "label": "Saturday" },
+        { "id": "opt_mon", "text": "Monday", "label": "Monday" },
+        { "id": "opt_sun", "text": "Sunday", "label": "Sunday" }
+      ],
+      "correct_option_id": "opt_fri"
+    },
+    {
+      "id": "dys_8_12_07",
+      "category": "short_comprehension",
+      "prompt": "\"The green frog jumped high over the wooden fence and landed softly in the mud.\" What did the frog jump over?",
+      "prompt_text": "\"The green frog jumped high over the wooden fence and landed softly in the mud.\" What did the frog jump over?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "The green frog jumped high over the wooden fence. What did the frog jump over?",
+      "options": [
+        { "id": "opt_fence", "text": "A wooden fence", "label": "A wooden fence" },
+        { "id": "opt_pond", "text": "A muddy pond", "label": "A muddy pond" },
+        { "id": "opt_tree", "text": "A tall tree", "label": "A tall tree" },
+        { "id": "opt_rock", "text": "A big rock", "label": "A big rock" }
+      ],
+      "correct_option_id": "opt_fence"
+    },
+    {
+      "id": "dys_8_12_08",
+      "category": "rhyme_phonological_awareness",
+      "prompt": "Which word makes the same ending rhyme sound as 'LAKE'?",
+      "prompt_text": "Which word makes the same ending rhyme sound as 'LAKE'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which word makes the same ending sound as LAKE? Cake, Like, Lock, or Leek?",
+      "options": [
+        { "id": "opt_cake", "text": "Cake", "label": "Cake" },
+        { "id": "opt_like", "text": "Like", "label": "Like" },
+        { "id": "opt_lock", "text": "Lock", "label": "Lock" },
+        { "id": "opt_leek", "text": "Leek", "label": "Leek" }
+      ],
+      "correct_option_id": "opt_cake"
+    }
+  ]
+}

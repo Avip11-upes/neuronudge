@@ -1,0 +1,137 @@
+{
+  "stage": "autism",
+  "age_band": "5-10",
+  "age_min": 5,
+  "age_max": 10,
+  "description": "Developmental and social communication activities covering emotion recognition, perspective taking, social rules, and simple figurative language for ages 5 to 10.",
+  "questions": [
+    {
+      "id": "aut_soc_01",
+      "category": "emotion_recognition",
+      "prompt": "A classmate accidentally dropped their drawing on the floor and their shoulders are slumped down. How might they be feeling?",
+      "prompt_text": "A classmate accidentally dropped their drawing on the floor and their shoulders are slumped down. How might they be feeling?",
+      "image_url": "scene_dropped_paper",
+      "audio_url": null,
+      "audio_text": "A classmate accidentally dropped their drawing on the floor and their shoulders are slumped down. How might they be feeling?",
+      "options": [
+        { "id": "opt_sad", "text": "Disappointed or upset", "label": "Disappointed or upset" },
+        { "id": "opt_excited", "text": "Excited and joyful", "label": "Excited and joyful" },
+        { "id": "opt_proud", "text": "Proud of their work", "label": "Proud of their work" },
+        { "id": "opt_bored", "text": "Sleepy and bored", "label": "Sleepy and bored" }
+      ],
+      "correct_option_id": "opt_sad"
+    },
+    {
+      "id": "aut_soc_02",
+      "category": "figurative_language",
+      "prompt": "When someone looks out the window and says 'It is raining cats and dogs outside!', what do they mean?",
+      "prompt_text": "When someone looks out the window and says 'It is raining cats and dogs outside!', what do they mean?",
+      "image_url": "scene_rain",
+      "audio_url": null,
+      "audio_text": "When someone looks out the window and says it is raining cats and dogs outside, what do they mean?",
+      "options": [
+        { "id": "opt_heavy_rain", "text": "It is raining very heavily", "label": "It is raining very heavily" },
+        { "id": "opt_real_animals", "text": "Real animals are falling from the sky", "label": "Real animals are falling from the sky" },
+        { "id": "opt_sunny_day", "text": "The sun is shining brightly", "label": "The sun is shining brightly" },
+        { "id": "opt_windy_pets", "text": "Pets are barking outside", "label": "Pets are barking outside" }
+      ],
+      "correct_option_id": "opt_heavy_rain"
+    },
+    {
+      "id": "aut_soc_03",
+      "category": "perspective_taking",
+      "prompt": "Your friend Maya loves talking about dinosaurs, but you like space. What is a polite way to have a conversation?",
+      "prompt_text": "Your friend Maya loves talking about dinosaurs, but you like space. What is a polite way to have a conversation?",
+      "image_url": "scene_friends_chat",
+      "audio_url": null,
+      "audio_text": "Your friend Maya loves talking about dinosaurs, but you like space. What is a polite way to have a conversation?",
+      "options": [
+        { "id": "opt_listen_share", "text": "Listen to her dinosaur facts and then take turns sharing space facts", "label": "Listen to her dinosaur facts and then take turns sharing space facts" },
+        { "id": "opt_interrupt", "text": "Tell her immediately that dinosaurs are boring", "label": "Tell her immediately that dinosaurs are boring" },
+        { "id": "opt_walk_away", "text": "Walk away without saying anything", "label": "Walk away without saying anything" },
+        { "id": "opt_cover_ears", "text": "Cover your ears while she is speaking", "label": "Cover your ears while she is speaking" }
+      ],
+      "correct_option_id": "opt_listen_share"
+    },
+    {
+      "id": "aut_soc_04",
+      "category": "social_situations_rules",
+      "prompt": "Two classmates are already playing a board game. What is the friendliest way to join?",
+      "prompt_text": "Two classmates are already playing a board game. What is the friendliest way to join?",
+      "image_url": "scene_board_game",
+      "audio_url": null,
+      "audio_text": "Two classmates are already playing a board game. What is the friendliest way to join?",
+      "options": [
+        { "id": "opt_ask_nicely", "text": "Wait for their turn to finish and ask: 'Can I join in the next round?'", "label": "Wait for their turn to finish and ask: 'Can I join in the next round?'" },
+        { "id": "opt_grab_pieces", "text": "Grab the dice immediately so you can roll", "label": "Grab the dice immediately so you can roll" },
+        { "id": "opt_block_board", "text": "Stand directly in front of the board so they stop", "label": "Stand directly in front of the board so they stop" },
+        { "id": "opt_restart", "text": "Tell them to start the whole game over right away", "label": "Tell them to start the whole game over right away" }
+      ],
+      "correct_option_id": "opt_ask_nicely"
+    },
+    {
+      "id": "aut_soc_05",
+      "category": "figurative_language",
+      "prompt": "After a runner gently trips on grass and laughs, their friend smiles warmly and says, 'Smooth move, champion!' What does the friend mean?",
+      "prompt_text": "After a runner gently trips on grass and laughs, their friend smiles warmly and says, 'Smooth move, champion!' What does the friend mean?",
+      "image_url": "scene_trip",
+      "audio_url": null,
+      "audio_text": "After a runner gently trips on grass and laughs, their friend smiles warmly and says: Smooth move, champion! What does the friend mean?",
+      "options": [
+        { "id": "opt_playful_joke", "text": "A playful, gentle joke to lighten the moment with a friend", "label": "A playful, gentle joke to lighten the moment with a friend" },
+        { "id": "opt_real_trophy", "text": "They are giving them an Olympic trophy", "label": "They are giving them an Olympic trophy" },
+        { "id": "opt_angry_yell", "text": "They are angry and shouting", "label": "They are angry and shouting" },
+        { "id": "opt_literal_gymnast", "text": "They think the trip was an athletic dance step", "label": "They think the trip was an athletic dance step" }
+      ],
+      "correct_option_id": "opt_playful_joke"
+    },
+    {
+      "id": "aut_soc_06",
+      "category": "emotion_recognition",
+      "prompt": "A student opens their lunchbox and discovers their favorite snack is inside. They smile widely and sit up straight. How do they feel?",
+      "prompt_text": "A student opens their lunchbox and discovers their favorite snack is inside. They smile widely and sit up straight. How do they feel?",
+      "image_url": "scene_lunchbox",
+      "audio_url": null,
+      "audio_text": "A student opens their lunchbox and discovers their favorite snack is inside. How do they feel?",
+      "options": [
+        { "id": "opt_happy", "text": "Happy and pleasantly surprised", "label": "Happy and pleasantly surprised" },
+        { "id": "opt_worried", "text": "Scared and nervous", "label": "Scared and nervous" },
+        { "id": "opt_angry", "text": "Upset and frustrated", "label": "Upset and frustrated" },
+        { "id": "opt_tired", "text": "Ready to fall asleep", "label": "Ready to fall asleep" }
+      ],
+      "correct_option_id": "opt_happy"
+    },
+    {
+      "id": "aut_soc_07",
+      "category": "perspective_taking",
+      "prompt": "During quiet library reading time, your friend wants to whisper a funny story. What should you remember about others around you?",
+      "prompt_text": "During quiet library reading time, your friend wants to whisper a funny story. What should you remember about others around you?",
+      "image_url": "scene_library",
+      "audio_url": null,
+      "audio_text": "During quiet library reading time, what should you remember about other people reading nearby?",
+      "options": [
+        { "id": "opt_quiet_respect", "text": "Others need quiet to concentrate, so we can talk after we leave the library", "label": "Others need quiet to concentrate, so we can talk after we leave the library" },
+        { "id": "opt_laugh_loudly", "text": "Laugh loudly so everyone can hear the funny story", "label": "Laugh loudly so everyone can hear the funny story" },
+        { "id": "opt_run_around", "text": "Run around the tables while telling the story", "label": "Run around the tables while telling the story" },
+        { "id": "opt_ignore_rules", "text": "Rules do not matter if a story is funny", "label": "Rules do not matter if a story is funny" }
+      ],
+      "correct_option_id": "opt_quiet_respect"
+    },
+    {
+      "id": "aut_soc_08",
+      "category": "social_situations_rules",
+      "prompt": "In art class, there is only one pair of green scissors at the table. Both you and another classmate need them. What can you do?",
+      "prompt_text": "In art class, there is only one pair of green scissors at the table. Both you and another classmate need them. What can you do?",
+      "image_url": "scene_art_class",
+      "audio_url": null,
+      "audio_text": "There is only one pair of scissors at the table. What is a helpful way to share?",
+      "options": [
+        { "id": "opt_share_turns", "text": "Ask if they can cut their shapes first, and then pass the scissors to you", "label": "Ask if they can cut their shapes first, and then pass the scissors to you" },
+        { "id": "opt_snatch", "text": "Quickly snatch the scissors before they can touch them", "label": "Quickly snatch the scissors before they can touch them" },
+        { "id": "opt_hide", "text": "Hide the scissors under your drawing paper", "label": "Hide the scissors under your drawing paper" },
+        { "id": "opt_give_up", "text": "Throw your paper away because you have to wait", "label": "Throw your paper away because you have to wait" }
+      ],
+      "correct_option_id": "opt_share_turns"
+    }
+  ]
+}

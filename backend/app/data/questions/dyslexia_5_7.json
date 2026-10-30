@@ -1,0 +1,137 @@
+{
+  "stage": "dyslexia",
+  "age_band": "5-7",
+  "age_min": 5,
+  "age_max": 7,
+  "description": "Early literacy, phonological awareness, and letter recognition activities for ages 5 to 7.",
+  "questions": [
+    {
+      "id": "dys_5_7_01",
+      "category": "letter_sound_matching",
+      "prompt": "Which letter makes the starting sound for 'SUN'?",
+      "prompt_text": "Which letter makes the starting sound for 'SUN'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which letter makes the starting sound for sun?",
+      "options": [
+        { "id": "opt_s", "text": "S", "label": "S" },
+        { "id": "opt_m", "text": "M", "label": "M" },
+        { "id": "opt_t", "text": "T", "label": "T" },
+        { "id": "opt_p", "text": "P", "label": "P" }
+      ],
+      "correct_option_id": "opt_s"
+    },
+    {
+      "id": "dys_5_7_02",
+      "category": "rhyme_phonological_awareness",
+      "prompt": "Which word rhymes with 'CAT'?",
+      "prompt_text": "Which word rhymes with 'CAT'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which word rhymes with cat? Hat, Dog, Sun, or Cup?",
+      "options": [
+        { "id": "opt_hat", "text": "Hat", "label": "Hat" },
+        { "id": "opt_dog", "text": "Dog", "label": "Dog" },
+        { "id": "opt_sun", "text": "Sun", "label": "Sun" },
+        { "id": "opt_cup", "text": "Cup", "label": "Cup" }
+      ],
+      "correct_option_id": "opt_hat"
+    },
+    {
+      "id": "dys_5_7_03",
+      "category": "real_vs_nonword",
+      "prompt": "Which of these is a REAL word that you can read in a story?",
+      "prompt_text": "Which of these is a REAL word that you can read in a story?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which of these is a real word? Hop, Zop, Vep, or Tob?",
+      "options": [
+        { "id": "opt_hop", "text": "Hop", "label": "Hop" },
+        { "id": "opt_zop", "text": "Zop", "label": "Zop" },
+        { "id": "opt_vep", "text": "Vep", "label": "Vep" },
+        { "id": "opt_tob", "text": "Tob", "label": "Tob" }
+      ],
+      "correct_option_id": "opt_hop"
+    },
+    {
+      "id": "dys_5_7_04",
+      "category": "letter_recognition",
+      "prompt": "Which of these letters is the lowercase 'b' as in 'ball'?",
+      "prompt_text": "Which of these letters is the lowercase 'b' as in 'ball'?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which of these letters is the lowercase b, as in ball?",
+      "options": [
+        { "id": "opt_d", "text": "d", "label": "d" },
+        { "id": "opt_b", "text": "b", "label": "b" },
+        { "id": "opt_p", "text": "p", "label": "p" },
+        { "id": "opt_q", "text": "q", "label": "q" }
+      ],
+      "correct_option_id": "opt_b"
+    },
+    {
+      "id": "dys_5_7_05",
+      "category": "spelling_choices",
+      "prompt": "Which is the correct spelling for the animal that barks?",
+      "prompt_text": "Which is the correct spelling for the animal that barks?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which is the correct spelling for the word dog?",
+      "options": [
+        { "id": "opt_dog", "text": "Dog", "label": "Dog" },
+        { "id": "opt_bog", "text": "Bog", "label": "Bog" },
+        { "id": "opt_gog", "text": "Gog", "label": "Gog" },
+        { "id": "opt_dug", "text": "Dug", "label": "Dug" }
+      ],
+      "correct_option_id": "opt_dog"
+    },
+    {
+      "id": "dys_5_7_06",
+      "category": "sequencing",
+      "prompt": "Look at the pattern: Morning, Afternoon... What comes next?",
+      "prompt_text": "Look at the pattern: Morning, Afternoon... What comes next?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Look at the pattern: Morning, Afternoon... What comes next?",
+      "options": [
+        { "id": "opt_night", "text": "Night", "label": "Night" },
+        { "id": "opt_breakfast", "text": "Breakfast", "label": "Breakfast" },
+        { "id": "opt_yesterday", "text": "Yesterday", "label": "Yesterday" },
+        { "id": "opt_noon", "text": "Noon", "label": "Noon" }
+      ],
+      "correct_option_id": "opt_night"
+    },
+    {
+      "id": "dys_5_7_07",
+      "category": "short_comprehension",
+      "prompt": "\"The little brown rabbit hopped under the bush.\" Where did the rabbit hop?",
+      "prompt_text": "\"The little brown rabbit hopped under the bush.\" Where did the rabbit hop?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "The little brown rabbit hopped under the bush. Where did the rabbit hop?",
+      "options": [
+        { "id": "opt_bush", "text": "Under the bush", "label": "Under the bush" },
+        { "id": "opt_tree", "text": "Up a tall tree", "label": "Up a tall tree" },
+        { "id": "opt_river", "text": "Into a cold river", "label": "Into a cold river" },
+        { "id": "opt_barn", "text": "Inside a big barn", "label": "Inside a big barn" }
+      ],
+      "correct_option_id": "opt_bush"
+    },
+    {
+      "id": "dys_5_7_08",
+      "category": "rhyme_phonological_awareness",
+      "prompt": "Which two words end with the same rhyme sound?",
+      "prompt_text": "Which two words end with the same rhyme sound?",
+      "image_url": null,
+      "audio_url": null,
+      "audio_text": "Which two words end with the same rhyme sound? Star and Car, Fish and Dog, or Ball and Hat?",
+      "options": [
+        { "id": "opt_star_car", "text": "Star and Car", "label": "Star and Car" },
+        { "id": "opt_fish_dog", "text": "Fish and Dog", "label": "Fish and Dog" },
+        { "id": "opt_ball_hat", "text": "Ball and Hat", "label": "Ball and Hat" },
+        { "id": "opt_tree_cup", "text": "Tree and Cup", "label": "Tree and Cup" }
+      ],
+      "correct_option_id": "opt_star_car"
+    }
+  ]
+}
