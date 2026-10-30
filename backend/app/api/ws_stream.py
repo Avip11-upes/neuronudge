@@ -56,6 +56,18 @@ def verify_session_in_db(session_id: str) -> bool:
     if not validate_uuid(session_id):
         return False
 
+    from app.db.database import get_db
+    try:
+        from app.main import app
+        if get_db in getattr(app, "dependency_overrides", {}):
+            override = app.dependency_overrides[get_db]
+            db_gen = override()
+            db = next(db_gen)
+            if SessionService.get_session(db, session_id) is not None:
+                return True
+    except Exception:
+        pass
+
     with SessionLocal() as db:
         session_obj = SessionService.get_session(db, session_id)
         return session_obj is not None

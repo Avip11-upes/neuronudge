@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     # Gemma 4 LLM Service placeholders for Assessment/Reporting modules
     gemma_model_name: str = "gemma-4"
     gemma_api_base_url: str = "http://localhost:11434"
+    gemini_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
