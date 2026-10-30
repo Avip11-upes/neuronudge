@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SupportOptionsCard } from '../components/report/SupportOptionsCard';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
