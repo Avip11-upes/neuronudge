@@ -25,6 +25,120 @@ def test_openapi_docs_accessible(client: TestClient):
     assert response.status_code == 200
     assert "swagger-ui" in response.text.lower() or "html" in response.headers.get("content-type", "")
 
+    # Verify openapi.json generates valid OpenAPI 3 schema
+    openapi_resp = client.get("/openapi.json")
+    assert openapi_resp.status_code == 200
+    openapi_data = openapi_resp.json()
+    assert openapi_data["openapi"].startswith("3.")
+    assert "/api/health" in openapi_data["paths"]
+    assert "/api/sessions" in openapi_data["paths"]
+
+
+# ============================================================================
+# Shared Schema Validation Tests (Milestone 1C)
+# ============================================================================
+
+def test_answer_schema_validation():
+    from app.schemas.answers import AnswerSubmit
+
+    valid_answer = AnswerSubmit(
+        stage_name="dyslexia",
+        question_id="dys_5_7_01",
+        selected_option="b",
+        response_time_ms=1500,
+        is_correct=True,
+    )
+    assert valid_answer.stage_name == "dyslexia"
+    assert valid_answer.response_time_ms == 1500
+
+    # Negative response time should fail validation
+    with pytest.raises(Exception):
+        AnswerSubmit(
+            stage_name="dyslexia",
+            question_id="dys_5_7_01",
+            response_time_ms=-10,
+        )
+
+
+def test_metrics_schema_validation():
+    from app.schemas.metrics import (
+        BlinkData,
+        CVBlockMetrics,
+        FramePacket,
+        GazeData,
+        TrackingFeedback,
+    )
+
+    # FramePacket with epoch milliseconds and base64 string
+    frame_pkt = FramePacket(
+        t=1730279000000,
+        block="adhd_video_2",
+        frame="data:image/jpeg;base64,/9j/4AAQSkZJRg==",
+    )
+    assert frame_pkt.t == 1730279000000
+    assert frame_pkt.block == "adhd_video_2"
+
+    # TrackingFeedback with explicit null/unavailable representations
+    feedback_unmeasured = TrackingFeedback()
+    assert feedback_unmeasured.face_found is None
+    assert feedback_unmeasured.lighting == "unavailable"
+    assert feedback_unmeasured.gaze_on_screen is None
+
+    gaze = GazeData(on_screen_ratio=0.88, fixation_count=12, coarse_region="center")
+    blink = BlinkData(blink_count=5, blink_rate_per_min=15.0)
+    metrics = CVBlockMetrics(
+        block_index=1,
+        stage_name="adhd",
+        tracking_quality=0.92,
+        face_detected=True,
+        lighting="ok",
+        gaze=gaze,
+        blink=blink,
+    )
+    assert metrics.tracking_quality == 0.92
+    assert metrics.gaze.on_screen_ratio == 0.88
+    assert metrics.lighting == "ok"
+
+
+def test_question_schema_excludes_answer_keys():
+    from app.schemas.answers import QuestionItem, QuestionOption, QuestionBankResponse
+
+    options = [
+        QuestionOption(id="a", label="d"),
+        QuestionOption(id="b", label="b"),
+    ]
+    question = QuestionItem(
+        id="dys_01",
+        category="letter_confusion",
+        prompt_text="Choose letter b",
+        options=options,
+    )
+    # Ensure QuestionItem schema has no answer key field
+    assert "correct_option" not in QuestionItem.model_fields
+    assert "is_correct" not in QuestionItem.model_fields
+
+
+def test_report_schema_validation():
+    from datetime import datetime
+    from app.schemas.report import ReportResponse, DomainIndicator
+
+    indicator = DomainIndicator(
+        domain="adhd",
+        indicator_level="Moderate",
+        observed_summary="Observed gaze dispersion during sustained visual tasks.",
+    )
+    report = ReportResponse(
+        id="rep-123",
+        session_id="sess-456",
+        domains=[indicator],
+        observations=["Task performance completed."],
+        recommendations=["Structured breaks."],
+        limitations=["Camera tracking confidence varied."],
+        created_at=datetime.utcnow(),
+    )
+    assert report.domains[0].domain == "adhd"
+    assert "screening prototype" in report.disclaimer.lower()
+
 
 @pytest.mark.parametrize("origin", ["http://localhost:8080", "http://localhost:5173"])
 def test_cors_headers(client: TestClient, origin: str):
