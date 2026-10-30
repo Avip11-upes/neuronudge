@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class StageRunBase(BaseModel):
@@ -26,5 +26,15 @@ class StageRunResponse(StageRunBase):
     completed_at: Optional[datetime] = None
     duration_seconds: Optional[float] = None
     metrics_summary: Optional[Dict[str, Any]] = None
+    ok: bool = True
+    summary: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="after")
+    def populate_summary(self) -> "StageRunResponse":
+        if self.summary is None and self.metrics_summary is not None:
+            self.summary = self.metrics_summary
+        elif self.summary is None:
+            self.summary = {}
+        return self

@@ -529,3 +529,69 @@ def test_frontend_delete_response_compatibility(client: TestClient):
     all_data = delete_all_resp.json()
     assert all_data["ok"] is True
     assert "deleted_count" in all_data
+
+
+# ============================================================================
+# Stage Lifecycle API Tests (Milestone M2B-2)
+# ============================================================================
+
+def test_stage_lifecycle_start_and_finish(client: TestClient):
+    """Verify start and finish stage endpoints, duration calculation, and session completion."""
+    # 1. Create a fresh session
+    create_resp = client.post(
+        "/api/sessions",
+        json={"nickname": "StageChild", "age": 7, "consent": True},
+    )
+    assert create_resp.status_code == 201
+    session_id = create_resp.json()["session_id"]
+
+    # 2. Start ADHD stage
+    start_resp = client.post(f"/api/sessions/{session_id}/stages/adhd/start")
+    assert start_resp.status_code == 200
+    start_data = start_resp.json()
+    assert start_data["ok"] is True
+    assert start_data["stage_name"] == "adhd"
+    assert start_data["status"] == "in_progress"
+    assert start_data["started_at"] is not None
+
+    # Verify session reflects active stage
+    sess_resp = client.get(f"/api/sessions/{session_id}")
+    assert sess_resp.json()["current_stage"] == "adhd"
+    assert sess_resp.json()["status"] == "in_progress"
+    assert sess_resp.json()["stages"]["adhd"] == "in_progress"
+
+    # 3. Finish ADHD stage
+    finish_resp = client.post(f"/api/sessions/{session_id}/stages/adhd/finish")
+    assert finish_resp.status_code == 200
+    finish_data = finish_resp.json()
+    assert finish_data["ok"] is True
+    assert finish_data["status"] == "completed"
+    assert finish_data["completed_at"] is not None
+    assert finish_data["duration_seconds"] is not None
+    assert finish_data["duration_seconds"] >= 0.0
+
+    # 4. Invalid stage name rejection
+    inv_start = client.post(f"/api/sessions/{session_id}/stages/invalid_stage/start")
+    assert inv_start.status_code == 422
+
+    inv_finish = client.post(f"/api/sessions/{session_id}/stages/invalid_stage/finish")
+    assert inv_finish.status_code == 422
+
+    # 5. Nonexistent session rejection
+    nonexistent = "00000000-0000-0000-0000-000000000000"
+    assert client.post(f"/api/sessions/{nonexistent}/stages/adhd/start").status_code == 404
+    assert client.post(f"/api/sessions/{nonexistent}/stages/adhd/finish").status_code == 404
+
+    # 6. Complete remaining stages (dyslexia, autism) and verify full session completion
+    client.post(f"/api/sessions/{session_id}/stages/dyslexia/start")
+    client.post(f"/api/sessions/{session_id}/stages/dyslexia/finish")
+    client.post(f"/api/sessions/{session_id}/stages/autism/start")
+    client.post(f"/api/sessions/{session_id}/stages/autism/finish")
+
+    final_sess = client.get(f"/api/sessions/{session_id}").json()
+    assert final_sess["status"] == "completed"
+    assert final_sess["stages"] == {
+        "adhd": "completed",
+        "dyslexia": "completed",
+        "autism": "completed",
+    }
