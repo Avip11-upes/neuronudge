@@ -20,7 +20,8 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 
-from app.cv.frame_decoder import FrameDecodeError, decode_frame
+from app.cv.face_mesh import FaceMeshResult, get_face_mesh_detector
+from app.cv.frame_decoder import DecodedFrame, FrameDecodeError, decode_frame
 from app.db.database import SessionLocal
 from app.services.session_service import SessionService
 
@@ -29,6 +30,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["stream"])
 
 VALID_STAGES = {"adhd", "dyslexia", "autism"}
+
+
+def process_frame_pipeline(frame_b64: str) -> tuple[DecodedFrame, FaceMeshResult]:
+    """Execute frame decoding and face landmark detection in a worker thread."""
+    decoded = decode_frame(frame_b64)
+    detector = get_face_mesh_detector()
+    mesh_res = detector.detect(decoded.image)
+    return decoded, mesh_res
 
 
 def validate_uuid(session_id: str) -> bool:
@@ -126,17 +135,28 @@ async def websocket_stream_endpoint(
 
                 frame_b64 = payload.get("frame")
                 try:
-                    # Offload CPU-bound image decoding to worker thread
-                    decoded = await asyncio.to_thread(decode_frame, frame_b64)
+                    # Offload CPU-bound image decoding and landmark detection to worker thread
+                    decoded, mesh_res = await asyncio.to_thread(
+                        process_frame_pipeline, frame_b64
+                    )
 
-                    # Truthful telemetry response:
-                    # In CV-1B, no facial tracking model is run.
-                    # We report actual measured lighting and explicit unmeasured tracking status.
+                    # Real telemetry response:
+                    # Reports actual face detection from MediaPipe, genuine lighting,
+                    # and unmeasured gaze status until CV-3 gaze model is active.
                     response = {
-                        "face_found": False,
+                        "face_found": mesh_res.face_detected,
                         "lighting": decoded.lighting,
-                        "gaze_on_screen": 0.0,
-                        "tracking_status": "unavailable",
+                        "gaze_on_screen": None,
+                        "tracking_quality": (
+                            mesh_res.tracking_quality
+                            if mesh_res.face_detected
+                            else None
+                        ),
+                        "tracking_status": (
+                            "tracking_active"
+                            if mesh_res.face_detected
+                            else "face_not_detected"
+                        ),
                     }
                     await websocket.send_json(response)
                 except FrameDecodeError as decode_err:

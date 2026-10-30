@@ -131,8 +131,9 @@ class TestWebSocketStream(unittest.TestCase):
             self.assertIn("lighting", response)
             self.assertEqual(response["lighting"], "ok")
             self.assertFalse(response["face_found"])
-            self.assertEqual(response["gaze_on_screen"], 0.0)
-            self.assertEqual(response["tracking_status"], "unavailable")
+            self.assertIsNone(response["gaze_on_screen"])
+            self.assertEqual(response["tracking_status"], "face_not_detected")
+            self.assertIsNone(response["tracking_quality"])
 
     def test_data_url_frame_processing(self):
         """Verify processing of frames formatted as Data URLs."""
@@ -154,7 +155,9 @@ class TestWebSocketStream(unittest.TestCase):
             )
             response = ws.receive_json()
             self.assertEqual(response["lighting"], "ok")
-            self.assertEqual(response["tracking_status"], "unavailable")
+            self.assertFalse(response["face_found"])
+            self.assertIsNone(response["gaze_on_screen"])
+            self.assertEqual(response["tracking_status"], "face_not_detected")
 
     def test_measured_lighting_classification(self):
         """Verify that telemetry reflects true measured luminance from frame_decoder."""
