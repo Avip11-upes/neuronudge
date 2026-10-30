@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { McqCard } from '../components/questions/McqCard';
 import { Progress } from '../components/ui/progress';
@@ -6,71 +6,112 @@ import { Button } from '../components/ui/button';
 import { useSessionStore } from '../store/sessionStore';
 import { api } from '../lib/api';
 import { Question } from '../lib/types';
-import { COPY } from '../lib/copy';
-import { BookOpen, Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+
+const LOAD_TIMEOUT_MS = 8000;
+
+// Rejects if the promise takes too long, so the page can never spin forever
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const id = setTimeout(() => reject(new Error('Request timed out')), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(id);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(id);
+        reject(e);
+      }
+    );
+  });
+}
 
 export default function DyslexiaStage() {
   const navigate = useNavigate();
-  const { sessionId, profile, updateStageStatus } = useSessionStore();
+  const { sessionId, profile, stages, updateStageStatus } = useSessionStore();
+  const age = profile?.age;
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // Fetch dyslexia questions
+  const startedRef = useRef(false); // stage start runs once
+  const finishedRef = useRef(false); // stage finish runs once
+
+  // Start the stage once. Don't flip an already-finished stage back to "running".
   useEffect(() => {
-    let isDisposed = false;
-    async function load() {
-      setIsLoading(true);
-      try {
-        if (sessionId) {
-          await api.startStage(sessionId, 'dyslexia').catch(() => {});
-          updateStageStatus('dyslexia', 'running');
-        }
+    if (!sessionId || startedRef.current) return;
+    startedRef.current = true;
 
-        const res = await api.getQuestions('dyslexia', profile?.age);
-        if (!isDisposed) {
-          setQuestions(res.questions);
-        }
-      } catch (err) {
-        console.warn('Failed loading dyslexia questions', err);
-      } finally {
-        if (!isDisposed) setIsLoading(false);
-      }
+    api.startStage(sessionId, 'dyslexia').catch((err) => {
+      console.warn('Could not start dyslexia stage on backend', err);
+    });
+    if (stages.dyslexia !== 'done') {
+      updateStageStatus('dyslexia', 'running');
     }
-    load();
-    return () => {
-      isDisposed = true;
-    };
-  }, [sessionId, profile?.age, updateStageStatus]);
+  }, [sessionId, stages, updateStageStatus]);
 
-  const handleAnswer = async (
-    optionId: string,
-    responseMs: number,
-    answerChanges: number
-  ) => {
+  // Load questions. Depends only on age and the retry counter, so store updates can't restart it.
+  useEffect(() => {
+    let disposed = false;
+    setIsLoading(true);
+    setError(null);
+
+    withTimeout(api.getQuestions('dyslexia', age), LOAD_TIMEOUT_MS)
+      .then((res) => {
+        if (disposed) return;
+        const raw: any = res;
+        const list: Question[] = Array.isArray(raw) ? raw : raw?.questions ?? [];
+        setQuestions(list);
+        setCurrentIndex(0);
+      })
+      .catch((err) => {
+        console.error('Could not load dyslexia questions', err);
+        if (!disposed) setError('We could not load the reading puzzles.');
+      })
+      .finally(() => {
+        if (!disposed) setIsLoading(false);
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, [age, reloadKey]);
+
+  const finishStage = () => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    if (sessionId) {
+      api.finishStage(sessionId, 'dyslexia').catch(() => {});
+    }
+    updateStageStatus('dyslexia', 'done');
+    navigate('/hub');
+  };
+
+  // Update the UI first; tell the backend in the background
+  const handleAnswer = (optionId: string, responseMs: number, answerChanges: number) => {
     const currentQ = questions[currentIndex];
     if (!currentQ) return;
 
     if (sessionId) {
-      await api.submitAnswer(sessionId, {
-        stage: 'dyslexia',
-        question_id: currentQ.id,
-        option_id: optionId,
-        response_ms: responseMs,
-        answer_changes: answerChanges,
-      }).catch(() => {});
+      api
+        .submitAnswer(sessionId, {
+          stage: 'dyslexia',
+          question_id: currentQ.id,
+          option_id: optionId,
+          response_ms: responseMs,
+          answer_changes: answerChanges,
+        })
+        .catch(() => {});
     }
 
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      // Stage finished
-      if (sessionId) {
-        await api.finishStage(sessionId, 'dyslexia').catch(() => {});
-      }
-      updateStageStatus('dyslexia', 'done');
-      navigate('/hub');
+      finishStage();
     }
   };
 
@@ -83,12 +124,30 @@ export default function DyslexiaStage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 text-center">
+        <AlertCircle className="w-8 h-8 text-amber-600 mb-3" />
+        <p className="text-stone-800 text-sm font-medium mb-1">{error}</p>
+        <p className="text-stone-500 text-xs mb-4 max-w-sm">
+          The question service may not be running yet. You can try again or go back to the hub.
+        </p>
+        <div className="flex gap-3">
+          <Button onClick={() => setReloadKey((k) => k + 1)}>Try again</Button>
+          <Button variant="outline" onClick={() => navigate('/hub')}>
+            Back to Hub
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const currentQ = questions[currentIndex];
-  const progressPercent = Math.round(((currentIndex + 1) / questions.length) * 100);
+  const progressPercent =
+    questions.length > 0 ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
-      {/* Top Header & Progress Bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -103,13 +162,12 @@ export default function DyslexiaStage() {
           </span>
         </div>
 
-        {/* Relaxed Progress Bar (no countdown) */}
         <Progress value={progressPercent} color="emerald" className="h-2" />
       </div>
 
-      {/* Main MCQ Card */}
       {currentQ ? (
         <McqCard
+          key={currentQ.id}
           question={currentQ}
           questionNumber={currentIndex + 1}
           totalQuestions={questions.length}

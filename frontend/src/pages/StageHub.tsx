@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -20,21 +20,32 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+const stageOrder: StageId[] = ['adhd', 'dyslexia', 'autism'];
+
 export default function StageHub() {
   const navigate = useNavigate();
-  const { sessionId, profile, stages, isAllStagesDone } = useSessionStore();
+  const { sessionId, profile, stages } = useSessionStore();
   const [health, setHealth] = useState<HealthResponse | null>(null);
 
+  // Computed here so it is always a real boolean, whatever the store exposes
+  const isAllStagesDone = stageOrder.every((s) => stages[s] === 'done');
+
+  // Check backend / LLM health on load; a failure must never break the page
   useEffect(() => {
-    // Check local LLM health on load
-    api.getHealth().then((res) => {
-      setHealth(res);
-    });
+    api
+      .getHealth()
+      .then((res) => setHealth(res))
+      .catch(() => setHealth(null));
   }, []);
 
-  const stageOrder: StageId[] = ['adhd', 'dyslexia', 'autism'];
+  // Dev-only debugging aid: shows what the hub sees whenever stage status changes
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('hub state', { sessionId, stages, isAllStagesDone });
+    }
+  }, [sessionId, stages, isAllStagesDone]);
 
-  // Find next stage to run
+  // First stage that is not finished yet
   const nextStage = stageOrder.find((s) => stages[s] !== 'done') || 'adhd';
 
   const handleStageClick = (stageId: StageId) => {
@@ -47,15 +58,15 @@ export default function StageHub() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Non-blocking LLM Health Banner if llm.ready is false */}
-      {health && !health.llm.ready && (
+      {/* Non-blocking LLM health banner */}
+      {health && !health.llm?.ready && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3 shadow-2xs">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <p className="leading-relaxed">{COPY.hub.llmOfflineNotice}</p>
         </div>
       )}
 
-      {/* Header Info */}
+      {/* Header info */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -67,7 +78,7 @@ export default function StageHub() {
             </h1>
           </div>
 
-          {/* Quick Action Top Button */}
+          {/* Quick action button */}
           {isAllStagesDone ? (
             <Button
               onClick={handleGenerateReport}
@@ -83,7 +94,9 @@ export default function StageHub() {
               size="lg"
               className="gap-2 shadow-sm"
             >
-              <span>{stages[nextStage] === 'running' ? COPY.hub.resumeCta : COPY.hub.startStageCta}</span>
+              <span>
+                {stages[nextStage] === 'running' ? COPY.hub.resumeCta : COPY.hub.startStageCta}
+              </span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           )}
@@ -93,11 +106,11 @@ export default function StageHub() {
           {COPY.hub.subtitle}
         </p>
 
-        {/* 3-Stage Progress Stepper */}
+        {/* 3-stage progress stepper */}
         <ProgressStepper stages={stages} className="mt-6" />
       </div>
 
-      {/* Stage Cards Grid */}
+      {/* Stage cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stageOrder.map((stageId) => {
           const meta = STAGES[stageId];
@@ -188,7 +201,7 @@ export default function StageHub() {
         })}
       </div>
 
-      {/* Completion Banner When All Done */}
+      {/* Completion banner */}
       {isAllStagesDone && (
         <div className="bg-linear-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 p-8 rounded-3xl text-center shadow-xs">
           <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-3">
