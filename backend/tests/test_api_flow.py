@@ -355,3 +355,177 @@ def test_delete_all_sessions(client: TestClient):
     # Verify sessions are empty
     list_resp = client.get("/api/sessions")
     assert list_resp.json()["total"] == 0
+
+
+# ============================================================================
+# Frontend/Backend API Compatibility Tests (Milestone 2B-1)
+# ============================================================================
+
+def test_frontend_session_creation_payload_compatibility(client: TestClient):
+    """Verify backend accepts frontend Profile.tsx payload and returns compatible aliases."""
+    frontend_payload = {
+        "nickname": "FrontendChild",
+        "age": 7,
+        "language": "en",
+        "taker": "child",
+        "consent": True,
+    }
+    response = client.post("/api/sessions", json=frontend_payload)
+    assert response.status_code == 201
+    data = response.json()
+
+    # Core UUID fields
+    assert "id" in data
+    assert "session_id" in data
+    assert data["session_id"] == data["id"]
+    assert len(data["session_id"]) == 36
+
+    # Nickname and age aliases
+    assert data["child_nickname"] == "FrontendChild"
+    assert data["nickname"] == "FrontendChild"
+    assert data["child_age"] == 7
+    assert data["age"] == 7
+    assert data["guardian_consent"] is True
+
+    # Stages dictionary for frontend stage tracking
+    assert "stages" in data
+    assert data["stages"] == {
+        "adhd": "pending",
+        "dyslexia": "pending",
+        "autism": "pending",
+    }
+    assert data["has_report"] is False
+
+
+def test_frontend_answer_submission_alias_compatibility():
+    """Verify AnswerSubmit schema accepts frontend SubmitAnswerRequest fields and preserves interaction metadata."""
+    from app.schemas.answers import AnswerSubmit
+
+    # Frontend SubmitAnswerRequest payload: answer_changes must be preserved in metadata
+    answer = AnswerSubmit.model_validate({
+        "stage": "dyslexia",
+        "question_id": "dys_5_7_01",
+        "option_id": "b",
+        "response_ms": 1250,
+        "answer_changes": 2,
+    })
+    assert answer.stage_name == "dyslexia"
+    assert answer.question_id == "dys_5_7_01"
+    assert answer.selected_option == "b"
+    assert answer.response_time_ms == 1250
+    assert answer.metadata is not None
+    assert answer.metadata["answer_changes"] == 2
+
+    # Conflicting alias and canonical field names must be rejected
+    with pytest.raises(Exception):
+        AnswerSubmit.model_validate({
+            "stage": "dyslexia",
+            "stage_name": "adhd",
+            "question_id": "dys_5_7_01",
+            "response_time_ms": 1000,
+        })
+
+
+def test_frontend_block_marker_alias_compatibility():
+    """Verify BlockMarkerCreate preserves semantics, does not fabricate block_index, and validates requirements."""
+    from app.schemas.metrics import BlockMarkerCreate
+
+    # Frontend block marker with block name, event, and timestamp
+    marker = BlockMarkerCreate.model_validate({
+        "stage": "adhd",
+        "block": "adhd_video_1",
+        "event": "start",
+        "t": 1730279000000,
+    })
+    assert marker.stage_name == "adhd"
+    assert marker.block_name == "adhd_video_1"
+    assert marker.event == "start"
+    assert marker.timestamp_ms == 1730279000000
+    # block_index must not be silently fabricated as 0
+    assert marker.block_index is None
+
+    # Backend-style block marker with numeric block_index
+    backend_marker = BlockMarkerCreate.model_validate({
+        "stage_name": "adhd",
+        "block_index": 2,
+        "timestamp_ms": 5000,
+    })
+    assert backend_marker.block_index == 2
+    assert backend_marker.block_name is None
+
+    # Missing both block_index and block_name must fail validation
+    with pytest.raises(Exception):
+        BlockMarkerCreate.model_validate({
+            "stage": "adhd",
+            "event": "start",
+        })
+
+    # Invalid event string must fail validation
+    with pytest.raises(Exception):
+        BlockMarkerCreate.model_validate({
+            "stage": "adhd",
+            "block": "adhd_video_1",
+            "event": "pause",
+        })
+
+
+def test_session_response_reflects_actual_reports_and_stages(
+    client: TestClient, db_session: Session
+):
+    """Verify has_report and stage statuses reflect actual database records, not hardcoded defaults."""
+    from app.db.models import ReportModel, StageRunModel
+
+    # Create session
+    create_resp = client.post(
+        "/api/sessions",
+        json={"nickname": "ReportChild", "age": 8, "consent": True},
+    )
+    session_id = create_resp.json()["session_id"]
+    assert create_resp.json()["has_report"] is False
+
+    # Attach stage run and report directly to database
+    stage_run = StageRunModel(session_id=session_id, stage_name="adhd", status="completed")
+    report = ReportModel(session_id=session_id, report_text="Observed engagement report", is_fallback=False)
+    db_session.add_all([stage_run, report])
+    db_session.commit()
+
+    # Fetch via API: has_report must be True and adhd status must be completed
+    get_resp = client.get(f"/api/sessions/{session_id}")
+    assert get_resp.status_code == 200
+    data = get_resp.json()
+    assert data["has_report"] is True
+    assert data["stages"]["adhd"] == "completed"
+    assert data["stages"]["dyslexia"] == "pending"
+
+
+def test_session_conflicting_aliases_rejected(client: TestClient):
+    """Verify providing conflicting alias and canonical fields produces 422."""
+    conflicting_payload = {
+        "child_nickname": "Alex",
+        "nickname": "Sam",
+        "age": 7,
+        "consent": True,
+    }
+    response = client.post("/api/sessions", json=conflicting_payload)
+    assert response.status_code == 422
+
+
+def test_frontend_delete_response_compatibility(client: TestClient):
+    """Verify session delete endpoints return { 'ok': True } for frontend api.ts."""
+    create_resp = client.post(
+        "/api/sessions",
+        json={"nickname": "DeleteChild", "age": 8, "consent": True},
+    )
+    session_id = create_resp.json()["session_id"]
+
+    delete_resp = client.delete(f"/api/sessions/{session_id}")
+    assert delete_resp.status_code == 200
+    data = delete_resp.json()
+    assert data["ok"] is True
+    assert "message" in data
+
+    delete_all_resp = client.delete("/api/sessions")
+    assert delete_all_resp.status_code == 200
+    all_data = delete_all_resp.json()
+    assert all_data["ok"] is True
+    assert "deleted_count" in all_data

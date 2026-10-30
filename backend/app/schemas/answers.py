@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class QuestionOption(BaseModel):
@@ -31,6 +31,36 @@ class AnswerSubmit(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(
         default=None, description="Interaction metrics (e.g. hover_count, answer_changes)"
     )
+
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_aliases(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            data = dict(data)
+            if "stage" in data:
+                if "stage_name" in data and data["stage_name"] != data["stage"]:
+                    raise ValueError("Conflicting values provided for 'stage' and 'stage_name'")
+                if "stage_name" not in data:
+                    data["stage_name"] = data["stage"]
+            if "option_id" in data:
+                if "selected_option" in data and data["selected_option"] != data["option_id"]:
+                    raise ValueError("Conflicting values provided for 'option_id' and 'selected_option'")
+                if "selected_option" not in data:
+                    data["selected_option"] = data["option_id"]
+            if "response_ms" in data:
+                if "response_time_ms" in data and data["response_time_ms"] != data["response_ms"]:
+                    raise ValueError("Conflicting values provided for 'response_ms' and 'response_time_ms'")
+                if "response_time_ms" not in data:
+                    data["response_time_ms"] = data["response_ms"]
+            # Preserve client-side interaction data like answer_changes in metadata
+            if "answer_changes" in data:
+                meta = dict(data.get("metadata") or {})
+                if "answer_changes" not in meta:
+                    meta["answer_changes"] = data["answer_changes"]
+                data["metadata"] = meta
+        return data
 
 
 class AnswerResponse(BaseModel):
