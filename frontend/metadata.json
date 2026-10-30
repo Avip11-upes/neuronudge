@@ -1,0 +1,6 @@
+{
+  "name": "NeuroNudge",
+  "description": "A friendly, staged early neurodivergence screening aid for ADHD, dyslexia, and autism.",
+  "requestFramePermissions": ["CAMERA"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
