@@ -1,223 +1,157 @@
-NEURONUDGE
-Early Neurodivergence Screening Platform
-Project Report v1.0 | Team Phoenix | Hacktober 2026
+# NeuroNudge
 
+**Recognizing learning challenges early, supporting every child better.**
 
-ABOUT THE PROJECT
-=================
+NeuroNudge is a web-based platform designed to help identify early signs of learning and developmental difficulties in children aged 5–10.
 
-NeuroNudge is a locally hosted web application that runs a short, staged, game-like assessment on a child or adult and produces an AI-written screening report about indicators of ADHD, dyslexia and autism.
+Through interactive activities, computer vision, and AI-assisted reporting, NeuroNudge helps parents and educators better understand a child's learning patterns and recognize when additional support may be helpful.
 
-Many families wait years for an evaluation, while the best window to help is early. NeuroNudge aims to shorten the path from a first worry to the right professional help.
+The platform focuses on three areas: **dyslexia, ADHD, and autism**.
 
-The assessment has three stages, one per condition. At the end, the backend computes deterministic scores, and the Gemini API turns those scores into a readable report with observed symptoms, a ranked list of the most to least likely condition (if any), and suggested next steps.
+> **Clinical Safety Notice**: NeuroNudge is an exploratory screening and learning-support prototype, **not** a clinical diagnostic tool. It never claims clinical diagnostic accuracy, never calculates disability probabilities, and never outputs medical diagnoses.
 
-IMPORTANT: NeuroNudge is a screening aid, not a diagnosis. It never says that a user has autism, ADHD or dyslexia. It reports indicator levels (Low, Moderate, High) and recommends a qualified professional for confirmation. Webcam-based gaze and expression analysis is approximate and depends on lighting, camera quality, and the user's age and attention. Every report carries a disclaimer, and users give explicit consent before the camera starts.
+---
 
+## How It Works
 
-KEY FEATURES
-============
+NeuroNudge combines short, child-friendly activities with measurable observations.
 
-- Three game-like stages covering attention and activity (ADHD), reading and phonology (dyslexia), and social communication and repetitive behaviour (autism).
-- Webcam analysis of gaze, blinks, head movement, facial engagement, eye contact and repetitive motion, using OpenCV and MediaPipe.
-- Age-banded dyslexia questions (5 to 7, 8 to 12, 13 and up) with text-to-speech audio prompts.
-- Transparent scoring: indicator levels come from plain, tunable code, not from the AI.
-- AI-written report from Gemini, with a template-based fallback if the API is unreachable.
-- Privacy first: all data stays on the laptop, no raw video is stored, and a delete-all-data button is always available.
-- Printable report (PDF via the browser print stylesheet) and a local history page.
+1. **Create a session** — A parent or guardian provides explicit consent and basic age information.
+2. **Complete the activities** — The child participates in reading, attention, and social-understanding activities.
+3. **Capture observations** — The system records interaction responses, reaction times, and real-time webcam measurements (processed in memory).
+4. **Analyze results** — Deterministic scoring processes the recorded task data *(scoring engine in progress)*.
+5. **Generate a report** — Gemma 4 explains observations in simple language and suggests practical next steps *(reporting service in progress)*.
 
+The goal is to make the results understandable and supportive without replacing professional evaluation.
 
-THE THREE STAGES
-================
+---
 
-Stage 1: ADHD
-  Task: About 3 minutes. 6 to 8 stimulus blocks of 20 to 30 seconds: bright animations, a calm slow scene, a fast-cut video, a find-the-moving-object game, and a press-when-a-star-appears task.
-  Signals: gaze-on-screen ratio and dispersion, look-aways, fixations and saccades, blink rate, head movement, facial engagement, reaction time, missed targets, false presses.
+## Key Features
 
-Stage 2: Dyslexia
-  Task: About 4 minutes, 15 to 20 multiple-choice questions, no camera. Letter confusion (b/d, p/q, m/w), rhyme and sound matching, real word vs. non-word, spelling choice, sequences, and short sentence comprehension.
-  Signals: accuracy per category, response time, hesitation (hover and answer changes), reversal-error count.
+- **Interactive Assessments** — Age-appropriate activities covering reading, attention, and social understanding.
+- **Computer Vision** — OpenCV and MediaPipe support real-time face mesh, iris tracking, and gaze estimation over WebSocket streaming.
+- **Performance Tracking** — Records task accuracy, response times, and interaction patterns.
+- **AI-Assisted Reports** *(In Progress)* — Google Gemma 4 translates assessment results into clear, parent-friendly explanations and supportive learning recommendations.
+- **Session History** — Local SQLite persistence stores session metadata and stage records for review.
+- **Privacy-Focused Design** — Ephemeral video processing in memory. Raw webcam frames are never persisted to disk or external services.
 
-Stage 3: Autism
-  Task: Part A (about 3 minutes): 10 to 12 illustrated social-situation questions. Part B (about 2 minutes): a friendly animated face talks to the user, followed by a neutral waiting screen.
-  Signals: question accuracy by category, eye-contact ratio toward the face, gaze aversion, repetitive head or body movement, limited facial expression range.
+---
 
+## Gemma 4 Integration
 
-USER FLOW
-=========
+NeuroNudge utilizes **Google Gemma 4** as its AI-powered reporting component *(currently in active development)*.
 
-1. Landing page with purpose, disclaimer and Start.
-2. Consent (guardian consent if age is under 18), camera permission, and a note that data stays local.
-3. Profile: nickname, age, language, and who is taking the test (child or adult).
-4. Camera check: face visible, lighting OK, and calibration by looking at 5 dots.
-5. Stage hub: three cards showing progress. Stages run in order but can be resumed.
-6. Stage 1, then Stage 2, then Stage 3.
-7. Processing screen while scoring and Gemini run.
-8. Report page with indicator chart, symptoms, ranking, recommendations and disclaimer, with PDF or print.
-9. History page listing earlier local sessions, with a delete-all-data button.
+Assessment results are first processed by the backend using deterministic scoring calculations. Gemma 4 then receives a structured, anonymized summary of the available measurements to draft an accessible narrative report.
 
+Its role is to:
+- Explain observed strengths and areas of difficulty in constructive language.
+- Suggest simple, age-appropriate learning activities and sensory accommodations.
+- Help parents understand recorded results without clinical jargon.
+- Encourage timely consultation with qualified specialists when concerns persist.
 
-TECH STACK
-==========
+**Safeguards**:
+- Gemma 4 does not calculate underlying measurements, assign diagnoses, or replace healthcare professionals.
+- Only the minimum necessary metric summaries are shared with the model.
+- Raw webcam footage, images, and identifying child information (PII) are strictly excluded from the reporting flow.
 
-Frontend: React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, React Router, TanStack Query, Framer Motion, Recharts (built with Lovable).
-Backend: Python 3.11, FastAPI, Uvicorn, Pydantic v2, SQLAlchemy.
-Computer vision: OpenCV (opencv-python), MediaPipe Face Mesh with iris landmarks, MediaPipe Hands (optional), NumPy, SciPy.
-AI report: Google Gemini API via the google-genai SDK, structured JSON output.
-Storage: SQLite file plus per-session JSON files in backend/storage/.
-Tooling: VS Code, concurrently, Git.
+---
 
+## Technology Stack
 
-ARCHITECTURE
-============
+| Component | Technology | Status |
+|---|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS | Implemented |
+| Backend | Python 3.11, FastAPI, Pydantic v2 | Implemented |
+| Database | SQLite, SQLAlchemy 2.x | Implemented |
+| Computer Vision | OpenCV, MediaPipe, NumPy | Implemented |
+| AI Reporting | Google Gemma 4 | In Progress |
+| Communication | REST API, WebSockets | Implemented |
+| Hosting & Deployment | DigitalOcean | Planned |
 
-The browser (React, localhost:8080) owns the webcam and timestamps every frame against what was on screen. It sends small JPEG frames (5 to 10 per second) to the FastAPI backend (localhost:8000) over a WebSocket, while normal requests use REST. The backend analyses frames with OpenCV and MediaPipe, scores the results, stores data locally in SQLite, and asks the Gemini API (cloud, metrics only) for the narrative report.
+---
 
-How the report is produced:
+## Project Structure
 
-1. Deterministic scoring (backend code). Each stage turns its features into a 0 to 100 indicator score against age-adjusted thresholds kept in config files. Scores map to Low (under 35), Moderate (35 to 65) or High (over 65), and the three conditions are ranked.
-2. Gemini writes the narrative. It receives compact JSON (age, metrics, scores, levels, ranking) and is told to explain, not re-score, and never to diagnose. The backend validates the JSON with Pydantic and retries once on failure. If Gemini is unreachable, a template-based fallback report is generated.
-
-
-PROJECT STRUCTURE
-=================
-
+```text
 neuronudge/
-|-- README.md
-|-- package.json            (root scripts: dev runs frontend + backend)
-|-- frontend/               (React + Vite + TypeScript, built with Lovable)
-|   |-- public/stimuli/     (images, videos, audio for stages)
-|   `-- src/
-|       |-- pages/          (Landing, Consent, Profile, CameraCheck, StageHub,
-|       |                    3 stages, Processing, Report, History)
-|       |-- components/     (layout, camera, stimuli, questions, report, ui)
-|       |-- hooks/          (useWebcam, useFrameStream, useSession, useStageTimer)
-|       |-- lib/            (api.ts, types.ts, constants.ts)
-|       `-- store/          (sessionStore.ts)
-`-- backend/                (FastAPI)
-    |-- requirements.txt
-    |-- run.py              (uvicorn launcher)
-    |-- .env.example        (GEMINI_API_KEY, GEMINI_MODEL, FRONTEND_ORIGIN)
-    `-- app/
-        |-- main.py, config.py
-        |-- api/            (health, sessions, stages, reports, ws_stream)
-        |-- cv/             (face_mesh, gaze, blink, head_pose, expression,
-        |                    repetitive_motion, aggregator)
-        |-- scoring/        (adhd, dyslexia, autism, combine)
-        |-- services/       (gemini_service, report_builder, session_service)
-        |-- db/             (database, models, crud)
-        |-- schemas/        (Pydantic models)
-        `-- data/           (question banks and report prompt)
+├── frontend/             # React application
+│   ├── src/
+│   │   ├── components/   # UI and stage components
+│   │   ├── hooks/        # Webcam, WebSocket, and session hooks
+│   │   ├── lib/          # API client and TypeScript contracts
+│   │   └── pages/        # Route pages
+│   └── public/
+├── backend/              # FastAPI backend
+│   ├── app/
+│   │   ├── api/          # REST (sessions, health, stages) and WebSocket endpoints
+│   │   ├── cv/           # Computer vision pipelines and landmark tracking
+│   │   ├── db/           # SQLAlchemy models and SQLite connection
+│   │   ├── schemas/      # Shared Pydantic validation schemas
+│   │   ├── scoring/      # Deterministic assessment scoring engines
+│   │   └── services/     # Session management and Gemma 4 reporting
+│   ├── tests/            # Automated test suite
+│   └── run.py            # Uvicorn server launcher
+└── docs/                 # API contracts and architecture specifications
+```
 
+---
 
-GETTING STARTED
-===============
+## Running Locally
 
-Prerequisites:
-- Python 3.11
-- Node.js and npm
-- A laptop with a webcam
-- A Gemini API key
+### Prerequisites
+- **Node.js** (v18+) and **npm**
+- **Python 3.11**
 
-1. Clone the repository
+### Backend Setup
 
-    git clone <your-repository-url>
-    cd neuronudge
+```bash
+cd backend
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python run.py
+```
 
-2. Set up the backend
+The FastAPI backend will be available at `http://localhost:8000`, with interactive OpenAPI documentation at `http://localhost:8000/docs`.
 
-    cd backend
-    python -m venv .venv
-    (Windows)     .venv\Scripts\activate
-    (macOS/Linux) source .venv/bin/activate
-    pip install -r requirements.txt
-    cp .env.example .env
+Backend configuration (including Gemma 4 model settings and CORS origins) is managed in `backend/.env`.
 
-   Open backend/.env and set GEMINI_API_KEY, GEMINI_MODEL and FRONTEND_ORIGIN. The API key lives only in the backend and is never exposed to the frontend.
+### Frontend Setup
 
-3. Set up the frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-    cd frontend
-    npm install
-    cp .env.example .env
+Vite will serve the frontend at `http://localhost:5173` (or `http://localhost:8080` depending on configuration).
 
-   The default is VITE_API_BASE_URL=http://localhost:8000. Set VITE_USE_MOCKS=true to run the UI with fake data before the backend is ready.
+### Running Both Concurrently
 
-4. Run everything
+From the root repository directory:
 
-   From the project root, one command starts both servers (using concurrently):
+```bash
+npm install
+npm run dev
+```
 
-    npm install
-    npm run dev
+---
 
-   Or run them separately: "python run.py" inside backend/, and "npm run dev" inside frontend/.
+## Privacy & Limitations
 
-5. Open the app
+NeuroNudge is designed to support early awareness, not provide medical diagnoses.
 
-- App: http://localhost:8080
-- API docs (OpenAPI): http://localhost:8000/docs
-- Health check: http://localhost:8000/api/health
+Webcam-based measurements are exploratory and can be influenced by lighting conditions, camera hardware, and subject movement. Assessment observations should never be interpreted as confirmed indicators of any medical condition without qualified clinical evaluation.
 
-The browser treats localhost as secure, so the webcam works without HTTPS. Use good, even lighting for best results.
+The platform is intended to help families understand observed learning patterns and seek professional guidance when needed.
 
+---
 
-API OVERVIEW
-============
+## Built for Hacktoberfest
 
-GET    /api/health                                   Backend alive check
-POST   /api/sessions                                 Create a session from profile and consent
-GET    /api/sessions                                 List sessions
-GET    /api/sessions/{id}                            Get one session with stage progress
-DELETE /api/sessions/{id}                            Delete one session
-DELETE /api/sessions                                 Delete all local data
-POST   /api/sessions/{id}/stages/{stage}/start       Begin a stage
-POST   /api/sessions/{id}/stages/{stage}/finish      End a stage, returns a summary
-GET    /api/questions/{stage}?age=                   Fetch age-banded multiple-choice questions
-POST   /api/sessions/{id}/answers                    Submit an answer with response time
-POST   /api/sessions/{id}/block-marker               Tell the backend which stimulus block is on screen
-POST   /api/sessions/{id}/report                     Run scoring and Gemini, returns the report
-GET    /api/sessions/{id}/report                     Fetch the stored report
-WS     /ws/stream/{id}?stage=                        Send webcam frames, receive live face and gaze status
+NeuroNudge was developed as a collaborative hackathon project, bringing together web development, computer vision, and AI to explore accessible, supportive tools for children's learning.
 
+---
 
-DATA MODEL
-==========
-
-SQLite tables: sessions, stage_runs, cv_blocks, answers, scores and reports. Raw video is never saved. Frames are analysed in memory and discarded, and only numeric metrics are stored. Per-session metrics.json and report.json files are written under backend/storage/, which is git-ignored.
-
-
-PRIVACY AND ETHICS
-==================
-
-- Explicit consent screen, guardian consent for users under 18, and the camera can be stopped at any time.
-- No raw video or images are stored, only numeric features.
-- All data is stored locally, and a delete-all-my-data button is always available.
-- Gemini is a cloud API. Only aggregated metrics and answers (no names, no images) are sent to it, and the consent screen states this clearly.
-- The API key lives only in backend/.env, never in the frontend.
-- The UI and report use the words "indicators" and "may suggest", never "has".
-
-
-LIMITATIONS
-===========
-
-- Laptop webcams give coarse gaze: expect left, right, top and bottom regions, not pixel accuracy.
-- Poor lighting and glasses glare reduce accuracy; the camera check step guards against this.
-- Expression and repetitive-motion detection are heuristics that need tuning on real test data.
-- Thresholds are initial guesses and are not clinically validated.
-- Question content should be reviewed by a qualified professional and informed by established screening instruments before any real-world use.
-
-
-ROADMAP
-=======
-
-Today: Hacktober MVP. Three screening modules and an instant report.
-Next:  Pilot and validate. Test with schools and clinics, review with experts, add local languages.
-Later: Scale up. Mobile app, clinician dashboard, progress tracking over time.
-
-
-TEAM AND LICENSE
-================
-
-Team: Team Phoenix, Hacktober 2026.
-The frontend was built with Lovable and the backend was built by teammates.
-License: add your license here (for example MIT).
+**Every child learns differently. Understanding those differences is where better support begins.**
