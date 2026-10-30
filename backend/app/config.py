@@ -1,7 +1,11 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import List, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_DB_FILE = (BACKEND_DIR / "storage" / "neuronudge.db").resolve()
 
 
 class Settings(BaseSettings):
@@ -19,8 +23,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
     ]
 
-    # Database placeholder for Milestone 1B
-    database_url: str = "sqlite:///./backend/storage/neuronudge.db"
+    # Database configuration (configurable for local and Droplet deployment)
+    database_url: str = f"sqlite:///{DEFAULT_DB_FILE}"
 
     # Gemma 4 LLM Service placeholders for Assessment/Reporting modules
     gemma_model_name: str = "gemma-4"
