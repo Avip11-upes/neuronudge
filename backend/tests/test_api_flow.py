@@ -298,6 +298,51 @@ def test_storage_deletion_path_traversal_protection():
     cleanup_session_storage("../../../etc")
 
 
+def test_session_persistence_across_restart(tmp_path):
+    import uuid
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from app.db.database import Base
+    from app.db.models import SessionModel
+
+    db_file = tmp_path / "test_restart.db"
+    db_url = f"sqlite:///{db_file}"
+
+    # Step 1: Start engine 1, create tables and insert session
+    engine1 = create_engine(db_url, connect_args={"check_same_thread": False})
+    Base.metadata.create_all(bind=engine1)
+    Session1 = sessionmaker(bind=engine1)
+
+    with Session1() as session:
+        test_session = SessionModel(
+            child_nickname="RestartTester",
+            child_age=8,
+            guardian_consent=True,
+            status="created",
+        )
+        session.add(test_session)
+        session.commit()
+        session_id = test_session.id
+        assert session_id is not None
+
+    # Step 2: Shutdown engine 1 (simulate process termination)
+    engine1.dispose()
+
+    # Step 3: Start engine 2 on the same database file (simulate backend reboot)
+    engine2 = create_engine(db_url, connect_args={"check_same_thread": False})
+    Session2 = sessionmaker(bind=engine2)
+
+    with Session2() as session:
+        reloaded = session.query(SessionModel).filter_by(id=session_id).first()
+        assert reloaded is not None
+        assert reloaded.child_nickname == "RestartTester"
+        assert reloaded.child_age == 8
+        assert reloaded.guardian_consent is True
+        assert reloaded.status == "created"
+
+    engine2.dispose()
+
+
 def test_delete_all_sessions(client: TestClient):
     # Create two sessions
     client.post("/api/sessions", json={"child_nickname": "A", "child_age": 6, "guardian_consent": True})
