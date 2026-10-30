@@ -40,31 +40,45 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
 
 ### 2.2 Create Session
 - **Endpoint:** `POST /api/sessions`
-- **Description:** Initializes a child assessment session. Enforces explicit guardian consent and age validation (5–10 years inclusive).
+- **Description:** Initializes a child assessment session. Enforces explicit guardian consent and age validation (5–10 years inclusive). Supports both canonical backend fields and frontend client payload aliases.
 - **Request Body (`application/json`):**
   ```json
   {
     "child_nickname": "Alex",
     "child_age": 7,
-    "guardian_consent": true
+    "guardian_consent": true,
+    "language": "en",
+    "taker": "child"
   }
   ```
+  *(Frontend alias format `{ "nickname": "Alex", "age": 7, "consent": true, "language": "en", "taker": "child" }` is also accepted).*
 - **Validation Rules:**
-  - `child_nickname`: string, 1–100 characters. Default: `"Child"`.
-  - `child_age`: integer, strictly between `5` and `10` inclusive.
-  - `guardian_consent`: boolean, must strictly be `true` (unverified client declaration for logging).
+  - `child_nickname` / `nickname`: string, 1–100 characters. Default: `"Child"`.
+  - `child_age` / `age`: integer, strictly between `5` and `10` inclusive.
+  - `guardian_consent` / `consent`: boolean, must strictly be `true` (unverified client declaration for logging).
+  - `language`: optional string (`"en"` or `"hi"`, default `"en"`).
+  - `taker`: optional string (`"child"` or `"adult"`, default `"child"`).
 - **Response (201 Created):**
   ```json
   {
     "id": "e9a03b5b-0145-4277-94e8-8a8f1dd63a56",
+    "session_id": "e9a03b5b-0145-4277-94e8-8a8f1dd63a56",
     "child_nickname": "Alex",
+    "nickname": "Alex",
     "child_age": 7,
+    "age": 7,
     "guardian_consent": true,
     "status": "created",
     "current_stage": null,
     "created_at": "2026-10-30T10:00:00.000000",
     "updated_at": "2026-10-30T10:00:00.000000",
-    "stage_runs": []
+    "stage_runs": [],
+    "stages": {
+      "adhd": "pending",
+      "dyslexia": "pending",
+      "autism": "pending"
+    },
+    "has_report": false
   }
   ```
 - **Error Responses:**
@@ -82,14 +96,23 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
     "items": [
       {
         "id": "e9a03b5b-0145-4277-94e8-8a8f1dd63a56",
+        "session_id": "e9a03b5b-0145-4277-94e8-8a8f1dd63a56",
         "child_nickname": "Alex",
+        "nickname": "Alex",
         "child_age": 7,
+        "age": 7,
         "guardian_consent": true,
         "status": "created",
         "current_stage": null,
         "created_at": "2026-10-30T10:00:00.000000",
         "updated_at": "2026-10-30T10:00:00.000000",
-        "stage_runs": []
+        "stage_runs": [],
+        "stages": {
+          "adhd": "pending",
+          "dyslexia": "pending",
+          "autism": "pending"
+        },
+        "has_report": false
       }
     ],
     "total": 1
@@ -100,7 +123,7 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
 
 ### 2.4 Get Session Details
 - **Endpoint:** `GET /api/sessions/{session_id}`
-- **Description:** Fetches a session by UUID with associated stage runs.
+- **Description:** Fetches a session by UUID with associated stage runs. Returns `SessionResponse` with backwards-compatible aliases (`session_id`, `nickname`, `age`, `stages`, `has_report`).
 - **Response (200 OK / 404 Not Found):** Same shape as `SessionResponse`.
 
 ---
@@ -125,6 +148,7 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
 - **Response (200 OK / 404 Not Found):**
   ```json
   {
+    "ok": true,
     "message": "Session 'e9a03b5b-0145-4277-94e8-8a8f1dd63a56' and all associated records deleted"
   }
   ```
@@ -137,6 +161,7 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
 - **Response (200 OK):**
   ```json
   {
+    "ok": true,
     "message": "All sessions and associated records deleted",
     "deleted_count": 5
   }
@@ -230,6 +255,7 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
     }
   }
   ```
+  *(Frontend alias payload `{ "stage": "dyslexia", "question_id": "dys_5_7_01", "option_id": "b", "response_ms": 2340, "answer_changes": 1 }` is also accepted; `answer_changes` is preserved in `metadata.answer_changes`).*
 - **Validation:** `response_time_ms` must be non-negative monotonic milliseconds. `is_correct` is determined server-side.
 - **Response (201 Created):** `AnswerResponse` object with persisted timestamp and record ID.
 
@@ -243,10 +269,12 @@ NeuroNudge combines REST APIs with a lightweight WebSocket telemetry stream:
     "stage_name": "adhd",
     "block_index": 2,
     "block_name": "adhd_video_2",
+    "event": "start",
     "timestamp_ms": 45000
   }
   ```
-- **Response (200 OK):** `{"status": "acknowledged", "session_id": "...", "block_index": 2}`
+  *(Frontend format `{ "stage": "adhd", "block": "adhd_video_2", "event": "start", "t": 45000 }` is also accepted; preserves start/end event, block identifier, and timestamp without fabricating block index).*
+- **Response (200 OK):** `{"status": "acknowledged", "session_id": "...", "block_name": "adhd_video_2"}`
 
 ---
 

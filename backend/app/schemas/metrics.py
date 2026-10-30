@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class FramePacket(BaseModel):
@@ -20,9 +20,56 @@ class TrackingFeedback(BaseModel):
 
 class BlockMarkerCreate(BaseModel):
     stage_name: str = Field(..., description="Stage name (e.g. adhd, autism)")
-    block_index: int = Field(..., ge=0, description="Sequential 0-indexed stimulus block")
-    block_name: Optional[str] = Field(None, description="Stimulus block identifier (e.g. adhd_video_2)")
-    timestamp_ms: Optional[int] = Field(None, ge=0, description="Client monotonic timestamp in milliseconds")
+    block_index: Optional[int] = Field(
+        None,
+        ge=0,
+        description="Sequential 0-indexed stimulus block; optional when identified by block_name",
+    )
+    block_name: Optional[str] = Field(
+        None,
+        description="Stimulus block identifier (e.g. adhd_video_2)",
+    )
+    event: Optional[str] = Field(
+        None,
+        description="Block event ('start' or 'end')",
+    )
+    timestamp_ms: Optional[int] = Field(
+        None,
+        ge=0,
+        description="Client monotonic timestamp in milliseconds",
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_aliases(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            data = dict(data)
+            if "stage" in data:
+                if "stage_name" in data and data["stage_name"] != data["stage"]:
+                    raise ValueError("Conflicting values provided for 'stage' and 'stage_name'")
+                if "stage_name" not in data:
+                    data["stage_name"] = data["stage"]
+            if "block" in data:
+                if "block_name" in data and data["block_name"] != data["block"]:
+                    raise ValueError("Conflicting values provided for 'block' and 'block_name'")
+                if "block_name" not in data:
+                    data["block_name"] = data["block"]
+            if "t" in data:
+                if "timestamp_ms" in data and data["timestamp_ms"] != data["t"]:
+                    raise ValueError("Conflicting values provided for 't' and 'timestamp_ms'")
+                if "timestamp_ms" not in data:
+                    data["timestamp_ms"] = data["t"]
+        return data
+
+    @model_validator(mode="after")
+    def validate_block_marker_requirements(self) -> "BlockMarkerCreate":
+        if self.block_index is None and not self.block_name:
+            raise ValueError("Either block_index or block_name (or block) must be provided.")
+        if self.event is not None and self.event not in ("start", "end"):
+            raise ValueError("event must be either 'start' or 'end'.")
+        return self
 
 
 class GazeData(BaseModel):

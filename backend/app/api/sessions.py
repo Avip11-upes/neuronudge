@@ -89,7 +89,10 @@ def delete_session(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session with ID '{session_id}' not found",
         )
-    return {"message": f"Session '{session_id}' and all associated records deleted"}
+    return {
+        "ok": True,
+        "message": f"Session '{session_id}' and all associated records deleted",
+    }
 
 
 @router.delete(
@@ -99,6 +102,7 @@ def delete_session(
 def delete_all_sessions(db: Session = Depends(get_db)) -> dict:
     deleted_count = SessionService.delete_all_sessions(db)
     return {
+        "ok": True,
         "message": "All sessions and associated records deleted",
         "deleted_count": deleted_count,
     }
