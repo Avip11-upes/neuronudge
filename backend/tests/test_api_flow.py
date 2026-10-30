@@ -529,3 +529,55 @@ def test_frontend_delete_response_compatibility(client: TestClient):
     all_data = delete_all_resp.json()
     assert all_data["ok"] is True
     assert "deleted_count" in all_data
+
+
+# ============================================================================
+# WebSocket Router Registration Tests (Milestone M2B-2A)
+# ============================================================================
+
+def test_ws_router_registration_and_path():
+    """Verify WebSocket router is registered without /api prefix exactly once."""
+    from app.main import app
+
+    ws_routes = [r.path for r in app.routes if "ws/stream" in getattr(r, "path", "")]
+    assert len(ws_routes) == 1
+    assert ws_routes[0] == "/ws/stream/{session_id}"
+    assert "/api/ws/stream/{session_id}" not in [r.path for r in app.routes]
+
+
+def test_ws_stream_connection_and_unmeasured_gaze(client: TestClient, db_session: Session):
+    """Verify live WS connection over main app, rejection of invalid IDs, and truthful telemetry."""
+    import uuid
+    from unittest.mock import patch
+    from starlette.websockets import WebSocketDisconnect
+    from app.schemas.session import SessionCreate
+    from app.services.session_service import SessionService
+    from tests.test_ws_stream import _create_jpeg_b64
+
+    with patch("app.api.ws_stream.SessionLocal", lambda: db_session):
+        # 1. Non-existent session must be rejected with 1008 (Policy Violation)
+        nonexistent = str(uuid.uuid4())
+        try:
+            with client.websocket_connect(f"/ws/stream/{nonexistent}?stage=adhd"):
+                pass
+            pytest.fail("Connection to non-existent session should have been rejected")
+        except WebSocketDisconnect as exc:
+            assert exc.code == 1008
+
+        # 2. Valid created session establishes connection and receives truthful telemetry
+        created = SessionService.create_session(
+            db_session,
+            SessionCreate(child_nickname="WSTester", child_age=7, guardian_consent=True),
+        )
+        session_id = created.id
+
+        with client.websocket_connect(f"/ws/stream/{session_id}?stage=adhd") as ws:
+            frame_b64 = _create_jpeg_b64(320, 240, (120, 120, 120))
+            ws.send_json({"t": 1730279000000, "block": "adhd_video_1", "frame": frame_b64})
+            response = ws.receive_json()
+
+            assert response["lighting"] == "ok"
+            assert response["face_found"] is False
+            # Unmeasured gaze must strictly be null/None, never fabricated
+            assert response["gaze_on_screen"] is None
+            assert response["tracking_quality"] is None

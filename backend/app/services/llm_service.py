@@ -159,7 +159,7 @@ class LLMService:
     ) -> Optional[Dict[str, Any]]:
         """Invokes Google GenAI API endpoint with Gemma 4 or compatible model."""
         prompt = cls._build_sanitized_prompt(child_age, metrics_summary)
-        model_name = "gemma-4-31b-it"
+        model_name = get_settings().gemma_model_name
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
 
         payload = {
