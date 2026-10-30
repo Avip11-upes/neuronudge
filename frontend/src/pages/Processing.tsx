@@ -7,7 +7,7 @@ import { api } from '../lib/api';
 import { COPY } from '../lib/copy';
 import { Report } from '../lib/types';
 import { Sparkles, Clock, AlertCircle, RefreshCw, Lock, Cpu } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Processing() {
   const navigate = useNavigate();

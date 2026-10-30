@@ -1,0 +1,14 @@
+{
+  "name": "neuronudge",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "python backend/run.py",
+    "dev": "concurrently -n web,api -c cyan,green \"npm:dev:frontend\" \"npm:dev:backend\"",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

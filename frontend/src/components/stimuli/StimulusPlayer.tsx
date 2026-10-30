@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TargetGame } from './TargetGame';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 interface StimulusPlayerProps {
   blockId: string;
